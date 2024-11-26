@@ -18,20 +18,20 @@ func AskForConfig(cfg *config.Config) *huh.Group {
 			Placeholder("Personal Access Token").
 			Prompt("PAT:").
 			Value(&cfg.GitlabPAT),
-		huh.NewInput().
-			Title("Введите Mattermost URL").
-			Placeholder("https://mattermost.example.team").
-			Prompt("URL:").
-			Value(&cfg.MattermostURL),
-		huh.NewInput().
-			Title("Введите Mattermost Bot Token").
-			Placeholder("Bot Token").
-			Prompt("Token:").
-			Value(&cfg.MattermostBotToken),
-		huh.NewInput().
-			Title("Введите Mattermost Channel ID").
-			Placeholder("Channel ID").
-			Prompt("ID:").
-			Value(&cfg.MattermostChannelID),
+		//huh.NewInput().
+		//	Title("Введите Mattermost URL").
+		//	Placeholder("https://mattermost.example.team").
+		//	Prompt("URL:").
+		//	Value(&cfg.MattermostURL),
+		//huh.NewInput().
+		//	Title("Введите Mattermost Bot Token").
+		//	Placeholder("Bot Token").
+		//	Prompt("Token:").
+		//	Value(&cfg.MattermostBotToken),
+		//huh.NewInput().
+		//	Title("Введите Mattermost Channel ID").
+		//	Placeholder("Channel ID").
+		//	Prompt("ID:").
+		//	Value(&cfg.MattermostChannelID),
 	)
 }

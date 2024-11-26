@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"branch-synchronizer-cli/internal/services"
 	"branch-synchronizer-cli/internal/services/gitlab/branch_ops"
-	"branch-synchronizer-cli/internal/services/gitlab/repo_ops"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
@@ -81,6 +79,7 @@ func QA(
 	///////////////////////////////////
 	///////// СРАВНЕНИЕ ВЕТОК /////////
 	///////////////////////////////////
+	var syncedProjects []string
 	log.Println(fmt.Sprintf(
 		"сравниваем ветки \"%s\" – \"%s\"...",
 		*sourceBranch, *targetBranch,
@@ -98,6 +97,8 @@ func QA(
 					break
 				}
 				if isDiffs == false {
+					syncedProjects = append(syncedProjects, (*projectNames)[i])
+
 					*projectIDs = append((*projectIDs)[:i], (*projectIDs)[i+1:]...)
 					*projectNames = append((*projectNames)[:i], (*projectNames)[i+1:]...)
 				}
@@ -115,7 +116,7 @@ func QA(
 	/////////////////////////////////////
 	log.Println("утверждаем выбор пользователя (будем ли создавать МРы)...")
 	err = huh.NewForm(
-		AskForAcknowledgement(confirm, projectNames, group, sourceBranch, targetBranch),
+		AskForAcknowledgement(confirm, projectNames, &syncedProjects, group, sourceBranch, targetBranch),
 	).WithTheme(cliTheme).Run()
 	if err != nil {
 		return fmt.Errorf(ErrorForm+"%w", err)
@@ -129,7 +130,7 @@ func QA(
 }
 
 func Action(
-	glc *gitlab.Client, mmc *services.MattermostClient, mrURL *string,
+	glc *gitlab.Client, mrURL *string, // mmc *services.MattermostClient
 	projectID, projectName, sourceBranch, targetBranch string,
 ) (Stage, error) {
 	var (
@@ -137,11 +138,11 @@ func Action(
 
 		spinErr   error
 		gitlabErr error
-		mmErr     error
-		splitErr  error
-
-		shortName string
-		fullName  string
+		//mmErr     error
+		//splitErr  error
+		//
+		//shortName string
+		//fullName  string
 	)
 
 	////////////////////////////////////
@@ -174,39 +175,39 @@ func Action(
 	//////////////////////////////////////
 	//////// ОТПРАВКА НОТИФИКАЦИЙ ////////
 	//////////////////////////////////////
-	log.Println("отправляем нотификацию в Mattermost...")
-	spinErr = spinner.New().
-		Title("Отправляем нотификацию...").
-		Action(func() {
-			shortName, fullName, splitErr = repo_ops.GetSplitProjectName(projectName)
-			if splitErr != nil {
-				return
-			}
-
-			message := fmt.Sprintf(
-				"> Created new Merge Request!\nService name: **\"%s\"**\nProject name: **\"%s\"**\n"+
-					"Branches: `%s -> %s`\nMerge Request: [link](%s)",
-				shortName, fullName, sourceBranch, targetBranch, *mrURL,
-			)
-			mmErr = mmc.Notify(message)
-		}).Run()
-	if spinErr != nil {
-		stageStatus.Notification = -1
-		return stageStatus, fmt.Errorf(ErrorSpinner+"%w", spinErr)
-	}
-
-	if splitErr != nil {
-		stageStatus.Notification = -1
-		return stageStatus, splitErr
-	}
-
-	if mmErr != nil {
-		stageStatus.Notification = -1
-		return stageStatus, mmErr
-	}
-
-	log.Println("нотификация отправлена!")
-	stageStatus.Notification = 1
+	//log.Println("отправляем нотификацию в Mattermost...")
+	//spinErr = spinner.New().
+	//	Title("Отправляем нотификацию...").
+	//	Action(func() {
+	//		shortName, fullName, splitErr = repo_ops.GetSplitProjectName(projectName)
+	//		if splitErr != nil {
+	//			return
+	//		}
+	//
+	//		message := fmt.Sprintf(
+	//			"> Created new Merge Request!\nService name: **\"%s\"**\nProject name: **\"%s\"**\n"+
+	//				"Branches: `%s -> %s`\nMerge Request: [link](%s)",
+	//			shortName, fullName, sourceBranch, targetBranch, *mrURL,
+	//		)
+	//		mmErr = mmc.Notify(message)
+	//	}).Run()
+	//if spinErr != nil {
+	//	stageStatus.Notification = -1
+	//	return stageStatus, fmt.Errorf(ErrorSpinner+"%w", spinErr)
+	//}
+	//
+	//if splitErr != nil {
+	//	stageStatus.Notification = -1
+	//	return stageStatus, splitErr
+	//}
+	//
+	//if mmErr != nil {
+	//	stageStatus.Notification = -1
+	//	return stageStatus, mmErr
+	//}
+	//
+	//log.Println("нотификация отправлена!")
+	//stageStatus.Notification = 1
 
 	return stageStatus, nil
 }

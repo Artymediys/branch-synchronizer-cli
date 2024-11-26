@@ -9,7 +9,6 @@ import (
 	"branch-synchronizer-cli/internal/cli"
 	"branch-synchronizer-cli/internal/config"
 	"branch-synchronizer-cli/internal/report"
-	"branch-synchronizer-cli/internal/services"
 	"branch-synchronizer-cli/pkg/utils"
 
 	"github.com/charmbracelet/huh"
@@ -69,15 +68,15 @@ func Run() {
 		return
 	}
 
-	log.Println("Создаём Mattermost клиент...")
-	mmc, err := services.NewMattermostClient(
-		viper.GetString("mm_url"), viper.GetString("mm_bot_token"), viper.GetString("mm_channel_id"),
-	)
-	if err != nil {
-		log.Println("не удалось создать клиент для взаимодействия с Mattermost -> ", err)
-		fmt.Println("не удалось создать клиент для взаимодействия с Mattermost -> ", err)
-		return
-	}
+	//log.Println("Создаём Mattermost клиент...")
+	//mmc, err := services.NewMattermostClient(
+	//	viper.GetString("mm_url"), viper.GetString("mm_bot_token"), viper.GetString("mm_channel_id"),
+	//)
+	//if err != nil {
+	//	log.Println("не удалось создать клиент для взаимодействия с Mattermost -> ", err)
+	//	fmt.Println("не удалось создать клиент для взаимодействия с Mattermost -> ", err)
+	//	return
+	//}
 
 	///////////////////////////////////
 	/////////// APPLICATION ///////////
@@ -98,22 +97,23 @@ func Run() {
 		return
 	}
 
-	var (
-		resultString string
-		mrURL        string
-	)
+	var resultString string
 	for i := 0; i < len(projectIDs); i++ {
 		projectName := strings.Join(strings.Fields(projectNames[i]), " ")
 
-		appStage, err := cli.Action(glc, mmc, &mrURL, projectIDs[i], projectName, sourceBranch, targetBranch)
+		var mrURL string
+		appStage, err := cli.Action(glc, &mrURL, projectIDs[i], projectName, sourceBranch, targetBranch) // mmc (mm-client)
 		if err != nil {
 			log.Println(err)
 		}
 
+		if mrURL == "" {
+			mrURL = "No link =("
+		}
 		resultString += fmt.Sprintf(
-			"Рапорт от: %s\nПроект: %s\nСоздание МР - %s\nНотификация – %s\n\n",
+			"Рапорт от: %s\nПроект: %s\nСтатус создания МР - %s\nСсылка на МР – %s\n\n",
 			time.Now().Format(time.DateTime), projectName,
-			appStage.MergeRequest.Status(), appStage.Notification.Status(),
+			appStage.MergeRequest.Status(), mrURL,
 		)
 		_, err = reportFile.WriteString(resultString)
 		if err != nil {
