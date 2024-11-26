@@ -81,6 +81,7 @@ func QA(
 	///////////////////////////////////
 	///////// СРАВНЕНИЕ ВЕТОК /////////
 	///////////////////////////////////
+	var syncedProjects []string
 	log.Println(fmt.Sprintf(
 		"сравниваем ветки \"%s\" – \"%s\"...",
 		*sourceBranch, *targetBranch,
@@ -98,6 +99,8 @@ func QA(
 					break
 				}
 				if isDiffs == false {
+					syncedProjects = append(syncedProjects, (*projectNames)[i])
+
 					*projectIDs = append((*projectIDs)[:i], (*projectIDs)[i+1:]...)
 					*projectNames = append((*projectNames)[:i], (*projectNames)[i+1:]...)
 				}
@@ -115,7 +118,7 @@ func QA(
 	/////////////////////////////////////
 	log.Println("утверждаем выбор пользователя (будем ли создавать МРы)...")
 	err = huh.NewForm(
-		AskForAcknowledgement(confirm, projectNames, group, sourceBranch, targetBranch),
+		AskForAcknowledgement(confirm, projectNames, &syncedProjects, group, sourceBranch, targetBranch),
 	).WithTheme(cliTheme).Run()
 	if err != nil {
 		return fmt.Errorf(ErrorForm+"%w", err)

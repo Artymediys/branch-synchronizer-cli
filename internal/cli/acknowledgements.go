@@ -8,19 +8,24 @@ import (
 
 func AskForAcknowledgement(
 	confirm *bool,
-	projectNames *[]string,
+	unsyncedProject, syncedProjects *[]string,
 	group, sourceBranch, targetBranch *string,
 ) *huh.Group {
-	var projectNamesMessage string
-
-	for _, projectName := range *projectNames {
-		projectNamesMessage += fmt.Sprintln(projectName)
+	var unsyncedProjectsMessage string
+	for _, projectName := range *unsyncedProject {
+		unsyncedProjectsMessage += fmt.Sprintln(projectName)
 	}
 
-	if len(*projectNames) > 0 {
+	var syncedProjectsMessage string
+	for _, projectName := range *syncedProjects {
+		syncedProjectsMessage += fmt.Sprintln(projectName)
+	}
+
+	if len(*unsyncedProject) > 0 {
 		ackText := fmt.Sprintf(
-			"СОЗДАЁМ МРы ДЛЯ ЭТИХ ПРОЕКТОВ?\nГруппа: %s\nВетки: %s -> %s\nПроекты:\n%s",
-			*group, *sourceBranch, *targetBranch, projectNamesMessage,
+			"БЫЛИ НАЙДЕНЫ НЕСИНХРОНИЗИРОВАННЫЕ ПРОЕКТЫ\nСОЗДАЁМ МРы ДЛЯ ЭТИХ ПРОЕКТОВ?\n"+
+				"Группа: %s\nВетки: %s -> %s\n\nСинхронизированные проекты:\n%s\nНЕсинхронизированные проекты:\n%s\n",
+			*group, *sourceBranch, *targetBranch, syncedProjectsMessage, unsyncedProjectsMessage,
 		)
 
 		return huh.NewGroup(
