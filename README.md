@@ -9,9 +9,6 @@ CLI-версия приложения для синхронизации вето
 0) **Конфигурация приложения** – на этом этапе предлагается ввести следующие поля:
     - `GitLab URL` – Адрес GitLab. Пример: https://gitlab.example.com
     - `GitLab PAT` – Personal Access Token, который можно получить в настройках юзера: _User settings –> Access tokens_
-    - `Mattermost URL` – Адрес Mattermost (по аналогии с GitLab). Пример: https://mattermost.example.team
-    - `Mattermost Bot Token` – Токен бота, от лица которого будут отправляться сообщения
-    - `Mattermost Channel ID` – ID канала, куда будут отправляться сообщения
 
    Этот этап появляется только при первом запуске, после чего введённые данные сохраняются в файл `.bsync_cli.yaml`
    в домашней директории пользователя.
